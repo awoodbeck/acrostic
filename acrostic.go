@@ -3,7 +3,6 @@
 package acrostic
 
 import (
-	"bytes"
 	"crypto/rand"
 	"fmt"
 	"math"
@@ -36,27 +35,6 @@ func randomInt64(max int64) (n int64, err error) {
 	}
 
 	n = i.Int64()
-
-	return
-}
-
-// stripCarriageReturns removes all carriage return characters
-// from the given byte slice and returns a new byte slice.
-func stripCarriageReturns(crb []byte) (b []byte, err error) {
-	if bytes.Index(crb, []byte{'\r'}) == -1 {
-		return crb, nil
-	}
-
-	bBuf := bytes.Buffer{}
-
-	for _, v := range bytes.Split(crb, []byte{'\r'}) {
-		_, err = bBuf.Write(v)
-		if err != nil {
-			return
-		}
-	}
-
-	b = bBuf.Bytes()
 
 	return
 }
