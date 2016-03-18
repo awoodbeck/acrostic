@@ -1,4 +1,4 @@
-package acrostic
+package words
 
 import (
 	"bytes"
@@ -88,8 +88,12 @@ func TestGetRandomKey(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := w.GetRandomKey(); err != nil {
+	r, err := w.GetRandomKey()
+	if err != nil {
 		t.Error("expected nil error; actual error was:", err)
+	}
+	if bytes.IndexByte(testKeys, r) == -1 {
+		t.Errorf("random key %q was not found in the key list", r)
 	}
 
 	// Test for empty keys slice.

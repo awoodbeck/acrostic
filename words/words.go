@@ -1,9 +1,11 @@
-package acrostic
+package words
 
 import (
 	"bytes"
 	"errors"
 	"io"
+
+	"github.com/awoodbeck/acrostic/tools"
 )
 
 // ErrEmptyBuffer is returned when a given buffer is empty.
@@ -85,7 +87,7 @@ Outer:
 // This is only taking into consideration the number of words. Capitalizing
 // words, or choosing different separators will increase the entropy on paper.
 func (w *Words) Entropy(n int) float64 {
-	return calcEntropy(float64(w.WordCount()), float64(n))
+	return tools.CalcEntropy(float64(w.WordCount()), float64(n))
 }
 
 // GetRandomKey returns a random key from the map.
@@ -103,7 +105,7 @@ func (w *Words) GetRandomKey() (key byte, err error) {
 	}
 
 	var n int64
-	n, err = randomInt64(length)
+	n, err = tools.RandomInt64(length)
 	if err != nil {
 		return
 	}
@@ -122,7 +124,7 @@ func (w *Words) GetRandomWord(key byte) (word string, err error) {
 	}
 
 	var n int64
-	n, err = randomInt64(int64(len(words)))
+	n, err = tools.RandomInt64(int64(len(words)))
 	if err != nil {
 		return
 	}
