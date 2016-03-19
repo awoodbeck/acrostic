@@ -71,9 +71,9 @@ type Acrostic struct {
 	nouns      *words.Words
 }
 
-// GenerateAcrostic accepts an integer indicating the number of phrases
+// GenerateAcrostics accepts an integer indicating the number of phrases
 // to return, and returns a string slice with the results.
-func (a *Acrostic) GenerateAcrostic(acro string, n int) (o []string, err error) {
+func (a *Acrostic) GenerateAcrostics(acro string, num int) (o []string, err error) {
 	var w string
 	acroLen := len(acro)
 
@@ -82,7 +82,7 @@ func (a *Acrostic) GenerateAcrostic(acro string, n int) (o []string, err error) 
 		err = ErrUninitialized
 	case acroLen == 0:
 		err = ErrBlankAcrostic
-	case n < 1:
+	case num < 1:
 		err = ErrInvalidNumber
 	}
 
@@ -90,7 +90,7 @@ func (a *Acrostic) GenerateAcrostic(acro string, n int) (o []string, err error) 
 		return
 	}
 
-	for i := 0; i < n; i++ {
+	for i := 0; i < num; i++ {
 		var p []byte
 		for j := 0; j < acroLen; j++ {
 			switch {
@@ -112,6 +112,67 @@ func (a *Acrostic) GenerateAcrostic(acro string, n int) (o []string, err error) 
 			}
 		}
 		o = append(o, string(p))
+	}
+
+	return
+}
+
+// GenerateRandomAcrostics accepts an acrostic length and an integer indicating the number
+// of acrostics to return.
+func (a *Acrostic) GenerateRandomAcrostics(length, num int) (o []string, err error) {
+	switch {
+	case a.adjectives == nil || a.nouns == nil:
+		err = ErrUninitialized
+	case length < 1:
+		err = ErrInvalidNumber
+	case num < 1:
+		err = ErrInvalidNumber
+	}
+
+	if err != nil {
+		return
+	}
+
+	acro := make([]byte, length)
+
+	for i := 0; i < length-1; i++ {
+		acro[i], err = a.adjectives.GetRandomKey()
+		if err != nil {
+			return
+		}
+	}
+
+	acro[length-1], err = a.nouns.GetRandomKey()
+	if err != nil {
+		return
+	}
+
+	return a.GenerateAcrostics(string(acro), num)
+}
+
+// GenerateRandomPhrases accepts two integers: words per phrase, and number of phrases.
+// It returns a string slice matching the number of phrases.
+func (a *Acrostic) GenerateRandomPhrases(words, num int) (o []string, err error) {
+	switch {
+	case a.adjectives == nil || a.nouns == nil:
+		err = ErrUninitialized
+	case words < 1:
+		err = ErrInvalidNumber
+	case num < 1:
+		err = ErrInvalidNumber
+	}
+
+	if err != nil {
+		return
+	}
+
+	var s []string
+	for i := 0; i < num; i++ {
+		s, err = a.GenerateRandomAcrostics(words, 1)
+		if err != nil {
+			return
+		}
+		o = append(o, s[0])
 	}
 
 	return
