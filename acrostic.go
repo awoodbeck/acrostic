@@ -108,7 +108,7 @@ func (a *Acrostic) GenerateAcrostic(acro string, n int) (o []string, err error) 
 				if err != nil {
 					return
 				}
-				p = append(p, []byte(" "+w)...)
+				p = append(p, []byte(w)...)
 			}
 		}
 		o = append(o, string(p))
