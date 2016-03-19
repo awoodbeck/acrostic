@@ -22,11 +22,10 @@ var ErrNonexistentKey = errors.New("word list does not contain the specified key
 
 // NewWords accepts a pointer to a bytes buffer and uses its contents
 // to populate a new Words object before returning its pointer.
-func NewWords(buf *bytes.Buffer) (w *Words, err error) {
-	w = &Words{words: make(map[byte][]string)}
-	err = w.CompileWords(buf)
+func NewWords(buf *bytes.Buffer) (*Words, error) {
+	w := &Words{words: make(map[byte][]string)}
 
-	return
+	return w, w.CompileWords(buf)
 }
 
 // Words maintains a word list, facilitates calculation of
@@ -91,12 +90,11 @@ func (w *Words) Entropy(n int) float64 {
 }
 
 // GetRandomKey returns a random key from the map.
-func (w *Words) GetRandomKey() (key byte, err error) {
+func (w *Words) GetRandomKey() (byte, error) {
 	length := int64(len(w.keys))
 	if length == 0 {
 		if len(w.words) == 0 {
-			err = ErrNoKeys
-			return
+			return 0, ErrNoKeys
 		}
 		for k := range w.words {
 			w.keys = append(w.keys, k)
@@ -104,41 +102,36 @@ func (w *Words) GetRandomKey() (key byte, err error) {
 		length = int64(len(w.keys))
 	}
 
-	var n int64
-	n, err = tools.RandomInt64(length)
+	n, err := tools.RandomInt64(length)
 	if err != nil {
-		return
+		return 0, err
 	}
 
-	key = w.keys[n]
-
-	return
+	return w.keys[n], nil
 }
 
 // GetRandomWord returns a random word from the map for the given key.
-func (w *Words) GetRandomWord(key byte) (word string, err error) {
+func (w *Words) GetRandomWord(key byte) (string, error) {
 	words, ok := w.words[key]
 	if !ok || len(words) == 0 {
-		err = ErrNonexistentKey
-		return
+		return "", ErrNonexistentKey
 	}
 
-	var n int64
-	n, err = tools.RandomInt64(int64(len(words)))
+	n, err := tools.RandomInt64(int64(len(words)))
 	if err != nil {
-		return
+		return "", err
 	}
 
-	word = words[n]
-
-	return
+	return words[n], err
 }
 
 // WordCount returns the total number of words in the current object.
-func (w *Words) WordCount() (c int) {
+func (w *Words) WordCount() int {
+	var c int
+
 	for _, v := range w.words {
 		c += len(v)
 	}
 
-	return
+	return c
 }
