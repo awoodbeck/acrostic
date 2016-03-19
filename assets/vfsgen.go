@@ -2,7 +2,7 @@
 
 // +build !dev
 
-package acrostic
+package assets
 
 import (
 	"bytes"
@@ -29,7 +29,7 @@ var Assets = func() http.FileSystem {
 	fs := _vfsgen_fs{
 		"/": &_vfsgen_dirInfo{
 			name:    "/",
-			modTime: mustUnmarshalTextTime("2016-03-02T21:04:22Z"),
+			modTime: mustUnmarshalTextTime("2016-03-19T04:23:14Z"),
 		},
 		"/adjectives.txt": &_vfsgen_compressedFileInfo{
 			name:              "adjectives.txt",
