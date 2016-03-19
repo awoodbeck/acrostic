@@ -19,19 +19,15 @@ func CalcEntropy(t, n float64) float64 {
 }
 
 // RandomInt64 generates a random 64-bit integer from 0 to "max."
-func RandomInt64(max int64) (n int64, err error) {
+func RandomInt64(max int64) (int64, error) {
 	if max < 1 {
-		err = ErrInvalidMax
-		return
+		return 0, ErrInvalidMax
 	}
 
-	var i *big.Int
-	i, err = rand.Int(rand.Reader, big.NewInt(max))
+	i, err := rand.Int(rand.Reader, big.NewInt(max))
 	if err != nil {
-		return
+		return 0, err
 	}
 
-	n = i.Int64()
-
-	return
+	return i.Int64(), nil
 }

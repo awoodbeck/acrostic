@@ -6,6 +6,8 @@ import (
 )
 
 func TestNewAcrostic(t *testing.T) {
+	t.Parallel()
+
 	a, err := NewAcrostic(nil, nil)
 	if err != nil {
 		t.Fatal("expected nil error; actual error:", err)
@@ -18,22 +20,25 @@ func TestNewAcrostic(t *testing.T) {
 	}
 }
 
-func TestGenerateAcrostic(t *testing.T) {
-	x := Acrostic{}
-	if _, err := x.GenerateAcrostic("test", 1); err != ErrUninitialized {
+func TestGenerateAcrostics(t *testing.T) {
+	t.Parallel()
+
+	var err error
+	a := &Acrostic{}
+	if _, err = a.GenerateAcrostics("test", 1); err != ErrUninitialized {
 		t.Error("expected ErrUninitialized error; actual error:", err)
 	}
 
-	a, err := NewAcrostic(nil, nil)
+	a, err = NewAcrostic(nil, nil)
 	if err != nil {
 		t.Fatal("expected nil error; actual error:", err)
 	}
 
-	if _, err := a.GenerateAcrostic("", 1); err != ErrBlankAcrostic {
+	if _, err = a.GenerateAcrostics("", 1); err != ErrBlankAcrostic {
 		t.Error("expected ErrBlankAcrostic error; actual error:", err)
 	}
 
-	if _, err := a.GenerateAcrostic("test", 0); err != ErrInvalidNumber {
+	if _, err = a.GenerateAcrostics("test", 0); err != ErrInvalidNumber {
 		t.Error("expected ErrInvalidNumber error; actual error:", err)
 	}
 
@@ -56,7 +61,11 @@ func TestGenerateAcrostic(t *testing.T) {
 		t.Fatal("expected nil error; actual error:", err)
 	}
 
-	acros, err := a.GenerateAcrostic(string(keys), 10)
+	var acros []string
+	acros, err = a.GenerateAcrostics(string(keys), 10)
+	if err != nil {
+		t.Fatal("expected nil error; actual error:", err)
+	}
 
 	for _, acro := range acros {
 		words := strings.Split(acro, " ")
@@ -65,5 +74,69 @@ func TestGenerateAcrostic(t *testing.T) {
 				t.Errorf("letter %q does not match the first letter of the word %q", keys[i], word)
 			}
 		}
+	}
+}
+
+func TestGenerateRandomAcrostics(t *testing.T) {
+	t.Parallel()
+
+	var err error
+	a := &Acrostic{}
+	if _, err = a.GenerateRandomAcrostics(4, 1); err != ErrUninitialized {
+		t.Error("expected ErrUninitialized error; actual error:", err)
+	}
+
+	a, err = NewAcrostic(nil, nil)
+	if err != nil {
+		t.Fatal("expected nil error; actual error:", err)
+	}
+
+	if _, err = a.GenerateRandomAcrostics(0, 1); err != ErrInvalidNumber {
+		t.Error("expected ErrInvalidNumber error; actual error:", err)
+	}
+
+	if _, err = a.GenerateRandomAcrostics(1, 0); err != ErrInvalidNumber {
+		t.Error("expected ErrInvalidNumber error; actual error:", err)
+	}
+
+	var acros []string
+	acros, err = a.GenerateRandomAcrostics(4, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if l := len(acros); l != 10 {
+		t.Error("expected 10 acrostics; actual =", l)
+	}
+}
+
+func TestGenerateRandomPhrases(t *testing.T) {
+	t.Parallel()
+
+	var err error
+	a := &Acrostic{}
+	if _, err = a.GenerateRandomPhrases(4, 1); err != ErrUninitialized {
+		t.Error("expected ErrUninitialized error; actual error:", err)
+	}
+
+	a, err = NewAcrostic(nil, nil)
+	if err != nil {
+		t.Fatal("expected nil error; actual error:", err)
+	}
+
+	if _, err = a.GenerateRandomPhrases(0, 1); err != ErrInvalidNumber {
+		t.Error("expected ErrInvalidNumber error; actual error:", err)
+	}
+
+	if _, err = a.GenerateRandomPhrases(1, 0); err != ErrInvalidNumber {
+		t.Error("expected ErrInvalidNumber error; actual error:", err)
+	}
+
+	var p []string
+	p, err = a.GenerateRandomPhrases(4, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if l := len(p); l != 10 {
+		t.Error("expected 10 phrases; actual =", l)
 	}
 }

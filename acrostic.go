@@ -5,7 +5,6 @@ package acrostic
 import (
 	"bytes"
 	"errors"
-	"net/http"
 
 	"github.com/awoodbeck/acrostic/assets"
 	"github.com/awoodbeck/acrostic/words"
@@ -25,43 +24,28 @@ var ErrUninitialized = errors.New("acrostic object has not been initialized")
 //
 // If the adjectives word list pointer is nil, the default adjectives word list will be used.
 // Likewise for the nouns word list pointer.
-func NewAcrostic(adjs, nouns *words.Words) (acro *Acrostic, err error) {
+func NewAcrostic(adjs, nouns *words.Words) (*Acrostic, error) {
+	var err error
+
 	if adjs == nil {
-		var adj http.File
-		adj, err = assets.Assets.Open("adjectives.txt")
+		adjs, err = getWordList("adjectives.txt")
 		if err != nil {
-			return
-		}
-		buf := &bytes.Buffer{}
-		if _, err = buf.ReadFrom(adj); err != nil {
-			return
-		}
-		adjs, err = words.NewWords(buf)
-		if err != nil {
-			return
+			return nil, err
 		}
 	}
 	if nouns == nil {
-		var adj http.File
-		adj, err = assets.Assets.Open("nouns.txt")
+		nouns, err = getWordList("nouns.txt")
 		if err != nil {
-			return
-		}
-		buf := &bytes.Buffer{}
-		if _, err = buf.ReadFrom(adj); err != nil {
-			return
-		}
-		nouns, err = words.NewWords(buf)
-		if err != nil {
-			return
+			return nil, err
 		}
 	}
-	acro = &Acrostic{
+
+	acro := &Acrostic{
 		adjectives: adjs,
 		nouns:      nouns,
 	}
 
-	return
+	return acro, nil
 }
 
 // Acrostic maintains a list of adjectives and nouns, and returns an acrostical
@@ -71,33 +55,31 @@ type Acrostic struct {
 	nouns      *words.Words
 }
 
-// GenerateAcrostic accepts an integer indicating the number of phrases
+// GenerateAcrostics accepts an integer indicating the number of phrases
 // to return, and returns a string slice with the results.
-func (a *Acrostic) GenerateAcrostic(acro string, n int) (o []string, err error) {
+func (a *Acrostic) GenerateAcrostics(acro string, num int) ([]string, error) {
+	var err error
+	var o []string
 	var w string
 	acroLen := len(acro)
 
 	switch {
 	case a.adjectives == nil || a.nouns == nil:
-		err = ErrUninitialized
+		return o, ErrUninitialized
 	case acroLen == 0:
-		err = ErrBlankAcrostic
-	case n < 1:
-		err = ErrInvalidNumber
+		return o, ErrBlankAcrostic
+	case num < 1:
+		return o, ErrInvalidNumber
 	}
 
-	if err != nil {
-		return
-	}
-
-	for i := 0; i < n; i++ {
+	for i := 0; i < num; i++ {
 		var p []byte
 		for j := 0; j < acroLen; j++ {
 			switch {
 			case j == acroLen-1:
 				w, err = a.nouns.GetRandomWord(acro[j])
 				if err != nil {
-					return
+					return o, err
 				}
 				p = append(p, []byte(" "+w)...)
 			case j > 0:
@@ -106,7 +88,7 @@ func (a *Acrostic) GenerateAcrostic(acro string, n int) (o []string, err error) 
 			default:
 				w, err = a.nouns.GetRandomWord(acro[j])
 				if err != nil {
-					return
+					return o, err
 				}
 				p = append(p, []byte(w)...)
 			}
@@ -114,5 +96,74 @@ func (a *Acrostic) GenerateAcrostic(acro string, n int) (o []string, err error) 
 		o = append(o, string(p))
 	}
 
-	return
+	return o, nil
+}
+
+// GenerateRandomAcrostics accepts an acrostic length and an integer indicating the number
+// of acrostics to return.
+func (a *Acrostic) GenerateRandomAcrostics(length, num int) ([]string, error) {
+	var o []string
+	var err error
+
+	switch {
+	case a.adjectives == nil || a.nouns == nil:
+		return o, ErrUninitialized
+	case length < 1:
+		return o, ErrInvalidNumber
+	case num < 1:
+		return o, ErrInvalidNumber
+	}
+
+	acro := make([]byte, length)
+
+	for i := 0; i < length-1; i++ {
+		acro[i], err = a.adjectives.GetRandomKey()
+		if err != nil {
+			return o, err
+		}
+	}
+
+	acro[length-1], err = a.nouns.GetRandomKey()
+	if err != nil {
+		return o, err
+	}
+
+	return a.GenerateAcrostics(string(acro), num)
+}
+
+// GenerateRandomPhrases accepts two integers: words per phrase, and number of phrases.
+// It returns a string slice matching the number of phrases.
+func (a *Acrostic) GenerateRandomPhrases(words, num int) ([]string, error) {
+	var o []string
+	switch {
+	case a.adjectives == nil || a.nouns == nil:
+		return o, ErrUninitialized
+	case words < 1:
+		return o, ErrInvalidNumber
+	case num < 1:
+		return o, ErrInvalidNumber
+	}
+
+	for i := 0; i < num; i++ {
+		s, err := a.GenerateRandomAcrostics(words, 1)
+		if err != nil {
+			return o, err
+		}
+		o = append(o, s[0])
+	}
+
+	return o, nil
+}
+
+// getWordList accepts a file name and returns a pointer to a populated Words object.
+func getWordList(name string) (*words.Words, error) {
+	w, err := assets.Assets.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	buf := &bytes.Buffer{}
+	if _, err := buf.ReadFrom(w); err != nil {
+		return nil, err
+	}
+	return words.NewWords(buf)
 }
