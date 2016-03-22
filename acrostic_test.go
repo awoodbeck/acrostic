@@ -68,6 +68,7 @@ func TestGenerateAcrostics(t *testing.T) {
 	}
 
 	for _, acro := range acros {
+		t.Log(acro)
 		words := strings.Split(acro, " ")
 		for i, word := range words {
 			if word[0] != keys[i] {
@@ -106,6 +107,9 @@ func TestGenerateRandomAcrostics(t *testing.T) {
 	}
 	if l := len(acros); l != 10 {
 		t.Error("expected 10 acrostics; actual =", l)
+	}
+	for _, acro := range acros {
+		t.Log(acro)
 	}
 }
 
