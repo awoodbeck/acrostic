@@ -46,7 +46,12 @@ func TestWordCount(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if actual := w.WordCount(); actual != testWordsLen {
+	actual, err := w.WordCount()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if actual != testWordsLen {
 		t.Errorf("expected word count = %d; actual word count = %d", testWordsLen, actual)
 	}
 }
