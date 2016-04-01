@@ -85,8 +85,13 @@ Outer:
 //
 // This is only taking into consideration the number of words. Capitalizing
 // words, or choosing different separators will increase the entropy on paper.
-func (w *Words) Entropy(n int) float64 {
-	return tools.CalcEntropy(float64(w.WordCount()), float64(n))
+func (w *Words) Entropy(n int) (float64, error) {
+	i, err := w.WordCount()
+	if err != nil {
+		return 0.0, err
+	}
+
+	return tools.CalcEntropy(float64(i), float64(n)), nil
 }
 
 // GetRandomKey returns a random key from the map.
@@ -126,12 +131,16 @@ func (w *Words) GetRandomWord(key byte) (string, error) {
 }
 
 // WordCount returns the total number of words in the current object.
-func (w *Words) WordCount() int {
+func (w *Words) WordCount() (int, error) {
 	var c int
 
 	for _, v := range w.words {
 		c += len(v)
 	}
 
-	return c
+	if c < 0 {
+		return 0, errors.New("integer overflow")
+	}
+
+	return c, nil
 }
