@@ -18,7 +18,7 @@ func CalcEntropy(t, n float64) float64 {
 	return math.Log2(math.Pow(t, n))
 }
 
-// RandomInt64 generates a random 64-bit integer from 0 to "max."
+// RandomInt64 generates a random 64-bit integer from 0 to max.
 func RandomInt64(max int64) (int64, error) {
 	if max < 1 {
 		return 0, ErrInvalidMax
