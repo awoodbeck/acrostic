@@ -79,11 +79,11 @@ func WithSeparator(sep string) Option {
 // WithNumber adds a random number to the phrase within the specified range.
 // The number will be appended at the end by default.
 // Use WithNumberPosition to change the placement.
-func WithNumber(min, max int) Option {
+func WithNumber(minVal, maxVal int) Option {
 	return optionFunc(func(c *phraseConfig) {
 		c.includeNumber = true
-		c.numberMin = min
-		c.numberMax = max
+		c.numberMin = minVal
+		c.numberMax = maxVal
 	})
 }
 
@@ -204,32 +204,32 @@ func randomCapitalize(s string) string {
 	return result.String()
 }
 
-// randomNumber generates a random number in the range [min, max].
-func randomNumber(min, max int) (int, error) {
-	if min > max {
-		return 0, fmt.Errorf("min (%d) cannot be greater than max (%d)", min, max)
+// randomNumber generates a random number in the range [minVal, maxVal].
+func randomNumber(minVal, maxVal int) (int, error) {
+	if minVal > maxVal {
+		return 0, fmt.Errorf("min (%d) cannot be greater than max (%d)", minVal, maxVal)
 	}
 
-	if min == max {
-		return min, nil
+	if minVal == maxVal {
+		return minVal, nil
 	}
 
-	rangeSize := max - min + 1
+	rangeSize := maxVal - minVal + 1
 	n, err := rand.Int(rand.Reader, big.NewInt(int64(rangeSize)))
 	if err != nil {
 		return 0, err
 	}
 
-	return int(n.Int64()) + min, nil
+	return int(n.Int64()) + minVal, nil
 }
 
-// randomInt generates a random integer from 0 to max-1.
-func randomInt(max int) (int, error) {
-	if max < 1 {
+// randomInt generates a random integer from 0 to maxVal-1.
+func randomInt(maxVal int) (int, error) {
+	if maxVal < 1 {
 		return 0, fmt.Errorf("max cannot be less than 1")
 	}
 
-	n, err := rand.Int(rand.Reader, big.NewInt(int64(max)))
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(maxVal)))
 	if err != nil {
 		return 0, err
 	}

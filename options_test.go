@@ -98,7 +98,7 @@ func TestWithCapitalization(t *testing.T) {
 
 	words := strings.Split(phrase, " ")
 	for i, word := range words {
-		if len(word) > 0 && word[0] < 'A' || word[0] > 'Z' {
+		if word != "" && word[0] < 'A' || word[0] > 'Z' {
 			t.Errorf("word %d (%s) should start with uppercase letter", i, word)
 		}
 	}
